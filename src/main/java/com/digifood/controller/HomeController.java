@@ -1,8 +1,11 @@
 package com.digifood.controller;
 
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+
+import javax.print.attribute.standard.MediaSize.Other;
 
 import org.apache.catalina.LifecycleListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +38,14 @@ import com.digifood.exception.InvalidTokenException;
 import com.digifood.exception.ResourceNotFoundException;
 import com.digifood.exception.UserExcistException;
 import com.digifood.model.Dish;
+import com.digifood.model.Notification;
+import com.digifood.model.RestaurantTable;
 import com.digifood.model.TableOrder;
 import com.digifood.model.User;
 import com.digifood.service.DishService;
+import com.digifood.service.NotificationService;
 import com.digifood.service.OrderService;
+import com.digifood.service.TableService;
 import com.digifood.service.UserService;
 import com.digifood.util.JwtUtil;
 
@@ -59,6 +66,13 @@ public class HomeController {
 	
 	@Autowired
 	private OrderService orderService;
+	
+	@Autowired
+	private TableService tableService;
+	
+	@Autowired 
+	private NotificationService notificationService;
+	
 	
 	@PreAuthorize("hasRole('ROLE_admin')")
 	@GetMapping("/hello")
@@ -108,7 +122,9 @@ public class HomeController {
 	
 	@GetMapping("/users/{role}")
 	public List<User> getUserByRole(@PathVariable(value = "role") String role){
-		return userService.getUsersByRole(role);
+		List<User>  users=userService.getUsersByRole(role);
+		users.forEach(u->u.setPassword(null));
+		return users;
 	}
 	
 	@PostMapping("/uploadImage")
@@ -139,10 +155,38 @@ public class HomeController {
                 .body(new ByteArrayResource(user.getFile()));
         }
      }
+    
+    
+//---------------------------------------------------------------------------------------------------------------------------
+//  Table APIs
+//---------------------------------------------------------------------------------------------------------------------------
+    @PostMapping("/table")
+	@PreAuthorize("hasRole('ROLE_admin')")
+	public RestaurantTable createTable(@RequestBody RestaurantTable restaurantTable) {
+		return tableService.addTable(restaurantTable);
+	}
+    
+    @GetMapping("/tables")
+    public List<RestaurantTable> getAllTables(){
+    	return tableService.getAll();
+    }
+    
+    @GetMapping("/table/{id}")
+    public RestaurantTable getTableById(@PathVariable("id") Long id)throws ResourceNotFoundException{
+    	return tableService.getById(id);
+    }
+    
+    @PutMapping("/table/{id}")
+    @PreAuthorize("hasRole('ROLE_admin')")
+    public RestaurantTable updateTable(@PathVariable("id") Long id,@RequestBody RestaurantTable restaurantTable) throws ResourceNotFoundException {
+    	return tableService.updateTable(id,restaurantTable);
+    }
+    
+    
 //---------------------------------------------------------------------------------------------------------------------------
 //    Dish APIs
 //---------------------------------------------------------------------------------------------------------------------------
-   
+
 	
 	@PostMapping("/dish")
 //	@PreAuthorize("hasRole('ROLE_cook')")§
@@ -191,8 +235,8 @@ public class HomeController {
 //---------------------------------------------------------------------------------------------------------------------------
 	
 	@PostMapping("/order")
-	public ResponseEntity<?> createOrder(@RequestBody TableOrder order){
-		return ResponseEntity.ok(orderService.createOrder(order));
+	public ResponseEntity<?> createOrder(@RequestBody TableOrder order, Principal principal) throws ResourceNotFoundException{
+		return ResponseEntity.ok(orderService.createOrder(order,principal.getName()));
 	}
 	
 	@GetMapping("/orders")
@@ -205,14 +249,28 @@ public class HomeController {
 		return orderService.getOrderById(orderId);
 	}
 	
-	@PatchMapping("/order/{orderId}")
-	public ResponseEntity<?> updateOrder(@PathVariable("orderId") Long orderId, @RequestBody Map<Object, Object> feilds) throws ResourceNotFoundException{
-		return ResponseEntity.ok(orderService.updateOrder(orderId,feilds));
+	@PatchMapping("/order/{orderId}") //other than status & 
+	public ResponseEntity<?> updateOrder(@PathVariable("orderId") Long orderId, @RequestBody Map<Object, Object> feilds,Principal principal) throws ResourceNotFoundException, InvalidTokenException{
+		return ResponseEntity.ok(orderService.updateOrder(orderId,feilds,principal.getName()));
+	}
+	
+	@PutMapping("/order/waiter")
+	public ResponseEntity<?> updateWaiter(@RequestParam(value="orderId") Long orderId,@RequestParam(value="waiterId") Long waiterId) throws ResourceNotFoundException{
+		return ResponseEntity.ok(orderService.updateWaiter(orderId,waiterId));
 	}
 	
 //	@DeleteMapping("/order/{orderId}")
 //	public void deleteOrderById(@PathVariable("orderId") Long orderId) throws ResourceNotFoundException {
 //		orderService.deleteOrderById(orderId);
 //	}
+	
+	
+//---------------------------------------------------------------------------------------------------------------------------
+//  Notification APIs
+//---------------------------------------------------------------------------------------------------------------------------
+	@GetMapping("/notification")
+	public List<Notification> getAllNotificationByReceiver(Principal principal){
+		return notificationService.getByReceiver(principal.getName());
+	}
 	
 }

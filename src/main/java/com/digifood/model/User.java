@@ -1,6 +1,7 @@
 package com.digifood.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -34,6 +36,8 @@ public class User extends AuditModel implements Serializable{
     
     private String fileName;
     private String fileType; 
+    
+    @JsonIgnore
     @Lob
     private byte[] file;
     
@@ -60,6 +64,13 @@ public class User extends AuditModel implements Serializable{
             mappedBy = "user")
     private Customer customer;
     
+    @JsonIgnore
+    @OneToMany(mappedBy = "actionBy")
+    private List<Notification> actionByNotifications;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver")
+    private List<Notification> receivingNotifications;
     
     public User(){
     	
@@ -195,6 +206,27 @@ public class User extends AuditModel implements Serializable{
 		this.file = file;
 	}
 
+
+	public List<Notification> getActionByNotifications() {
+		return actionByNotifications;
+	}
+
+
+	public void setActionByNotifications(List<Notification> actionByNotifications) {
+		this.actionByNotifications = actionByNotifications;
+	}
+
+
+	public List<Notification> getReceivingNotifications() {
+		return receivingNotifications;
+	}
+
+
+	public void setReceivingNotifications(List<Notification> receivingNotifications) {
+		this.receivingNotifications = receivingNotifications;
+	}
+
+	
 	
     
 }

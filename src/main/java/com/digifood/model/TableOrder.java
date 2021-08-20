@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.digifood.DTO.AuditModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Entity
@@ -25,7 +26,11 @@ public class TableOrder extends AuditModel{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private int tableNo;
+	
+	@ManyToOne
+	@JoinColumn(name = "table_id")
+	private RestaurantTable table;
+	
 	private int persions;
 	
 	@OneToMany(mappedBy = "order")
@@ -35,8 +40,16 @@ public class TableOrder extends AuditModel{
 	@JoinColumn(name = "waiter_id")
 	private Waiter waiter;
 	
+	@ManyToOne
+	@JoinColumn(name = "customer_id")
+	private Customer customer;
+	
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "order")
+	private List<Notification> notifications;
 	
 	public TableOrder() {
 		// TODO Auto-generated constructor stub
@@ -50,14 +63,15 @@ public class TableOrder extends AuditModel{
 		this.id = id;
 	}
 
-	public int getTableNo() {
-		return tableNo;
+	
+
+	public RestaurantTable getTable() {
+		return table;
 	}
 
-	public void setTableNo(int tableNo) {
-		this.tableNo = tableNo;
+	public void setTable(RestaurantTable table) {
+		this.table = table;
 	}
-
 
 	public List<OrderDish> getOrderDish() {
 		return orderDish;
@@ -89,6 +103,22 @@ public class TableOrder extends AuditModel{
 
 	public void setWaiter(Waiter waiter) {
 		this.waiter = waiter;
+	}
+
+	public Customer getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+
+	public List<Notification> getNotifications() {
+		return notifications;
+	}
+
+	public void setNotifications(List<Notification> notifications) {
+		this.notifications = notifications;
 	}
 	
 	

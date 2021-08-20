@@ -32,6 +32,8 @@ public class Dish extends AuditModel{
 	private boolean popular;
 	private String fileName;
     private String fileType; 
+    
+    @JsonIgnore
     @Lob
     private byte[] file;
     

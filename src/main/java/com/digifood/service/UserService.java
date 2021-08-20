@@ -26,12 +26,14 @@ import com.digifood.model.Cashier;
 import com.digifood.model.Cook;
 import com.digifood.model.Customer;
 import com.digifood.model.Dish;
+import com.digifood.model.RestaurantTable;
 import com.digifood.model.User;
 import com.digifood.model.VerificationToken;
 import com.digifood.model.Waiter;
 import com.digifood.repository.CashierRepository;
 import com.digifood.repository.CookRepository;
 import com.digifood.repository.CustomerRepository;
+import com.digifood.repository.TableRepository;
 import com.digifood.repository.UserRepository;
 import com.digifood.repository.VerificationTokenRepository;
 import com.digifood.repository.WaiterRepository;
@@ -53,6 +55,9 @@ public class UserService {
 	
 	@Autowired
 	private CashierRepository cashierRepository;
+	
+	@Autowired
+	private TableRepository tableRepository;
 	
 	@Autowired
     private VerificationTokenRepository tokenRepository;
@@ -85,6 +90,8 @@ public class UserService {
 				break;
 			case "ROLE_waiter":
 				Waiter waiter=user.getWaiter();
+				List<RestaurantTable> tables=waiter.getTables();
+				tables.forEach(t->t.setWaiter(waiter));
 				waiter.setUser(user);
 				break;
 			case "ROLE_cook":
@@ -99,6 +106,15 @@ public class UserService {
 				break;
 			}
 			User userRes=userRepository.save(user);
+			
+			if(user.getRole().equals("ROLE_waiter")) {
+				Waiter waiter=userRes.getWaiter();
+				List<RestaurantTable> tables=waiter.getTables();
+				tables.forEach(t->{
+					t.setWaiter(waiter);
+					tableRepository.save(t);
+				});
+			}
 			return userRes;
 		}
 		
@@ -201,7 +217,7 @@ public class UserService {
 
 	public List<User> getUsersByRole(String role) {
 		List<User> users=userRepository.findByRole(role);
-		users.forEach(user->user.setPassword(null));
+		
 		return users;
 	}
 	

@@ -35,7 +35,11 @@ public class Waiter implements Serializable{
 	@OneToMany(mappedBy = "waiter")
 	private List<TableOrder> orders;
 	
+	@OneToMany(mappedBy = "waiter")
+	private List<RestaurantTable> tables;
+	
 	private String employeeNumber;
+	
 	private String transcriptionLanguage;
 	private String country;
 	
@@ -81,6 +85,15 @@ public class Waiter implements Serializable{
 	public void setOrders(List<TableOrder> orders) {
 		this.orders = orders;
 	}
+
+	public List<RestaurantTable> getTables() {
+		return tables;
+	}
+
+	public void setTables(List<RestaurantTable> tables) {
+		this.tables = tables;
+	}
+	
 	
 	
 }
