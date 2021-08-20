@@ -1,10 +1,10 @@
-package com.igifood;
+package com.digifood;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class IgiFoodBackendApplicationTests {
+class DigiFoodBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
