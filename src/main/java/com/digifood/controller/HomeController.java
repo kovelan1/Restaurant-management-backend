@@ -73,6 +73,10 @@ public class HomeController {
 	@Autowired 
 	private NotificationService notificationService;
 	
+	@GetMapping("/")
+	public ResponseEntity<?> health() {
+		return ResponseEntity.ok("");
+	}
 	
 	@PreAuthorize("hasRole('ROLE_admin')")
 	@GetMapping("/hello")
@@ -94,6 +98,13 @@ public class HomeController {
 		final String token= jwtUtil.generateToken(authenticationRequest.getUserName());
 		
 		return ResponseEntity.ok(new AuthenticationResponse(user.getUsername(),user.getRole(),token));
+	}
+	
+	@GetMapping("/me") //role should be -> ROLE_customer , ROLE_waiter, ROLE_cashier, ROLE_waiter
+	public ResponseEntity<User> getUserByrRole( Principal principal) throws UserExcistException {
+		
+			return ResponseEntity.ok(userService.getSigninUser(principal.getName()));
+		
 	}
 	
 	//user related APIs

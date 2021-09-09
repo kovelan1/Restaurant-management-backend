@@ -220,6 +220,11 @@ public class UserService {
 		
 		return users;
 	}
+
+	public User getSigninUser(String name) {
+		return userRepository.findByUsername(name);
+		
+	}
 	
 	
 	
